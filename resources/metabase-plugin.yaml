@@ -1,0 +1,33 @@
+info:
+  name: Metabase Impala Driver
+  version: 1.0.0-SNAPSHOT-2.6.17
+  description: Allows Metabase to connect to Impala databases.
+driver:
+  - name: impala
+    display-name: Impala
+    lazy-load: true
+    parent: sql-jdbc
+    connection-properties:
+      - host
+      - merge:
+          - port
+          - default: 21050
+      - merge:
+          - dbname
+          - default: default
+          - placeholder: default
+          - required: false
+      - merge:
+          - user
+          - required: false
+      - password
+      - merge:
+          - additional-options
+          - name: jdbc-flags
+            default: ';auth=noSasl'
+    connection-properties-include-tunnel-config: false
+init:
+  - step: load-namespace
+    namespace: metabase.driver.impala
+  - step: register-jdbc-driver
+    class: com.cloudera.impala.jdbc.Driver
