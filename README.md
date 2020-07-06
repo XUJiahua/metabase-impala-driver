@@ -2,7 +2,7 @@
 
 ## Usage
 
-Copy [`impala.metabase-driver.jar`](https://github.com/XUJiahua/metabase-impala-driver/releases/tag/v1.0.0-SNAPSHOT-2.6.17) to metabase `plugins` folder.
+Copy [`impala.metabase-driver.jar`](https://github.com/XUJiahua/metabase-impala-driver/releases) to metabase `plugins` folder.
 
 ## Initial tests passed
 
