@@ -18,13 +18,9 @@ driver:
           - placeholder: default
           - required: false
       - merge:
-          - user
-          - required: false
-      - password
-      - merge:
           - additional-options
           - name: jdbc-flags
-            default: ';auth=noSasl'
+            default: ';AuthMech=0'
     connection-properties-include-tunnel-config: false
 init:
   - step: load-namespace
