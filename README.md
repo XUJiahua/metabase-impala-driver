@@ -33,7 +33,7 @@ For more infomation, reference the Impala JDBC Guide.
 Metabase Release | Driver Version | Impala Version
 ---------------- | -------------- | --------------
 0.35.4           | 1.0.0-SNAPSHOT-2.6.17 | 2.5.0
-0.35.4           | 1.0.0-SNAPSHOT-2.6.17 | 3.2.0 
+0.35.4           | 1.0.0-SNAPSHOT-2.6.17 | 3.2.0
 
 ## Building from Source
 
@@ -56,6 +56,9 @@ make build
 
 get driver from `target/uberjar/impala.metabase-driver.jar`
 
+### Dev
+
+Reference [dev.md](doc/dev.md).
 
 ## FAQ
 
