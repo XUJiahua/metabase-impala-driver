@@ -16,6 +16,7 @@
              [connection :as sql-jdbc.conn]
              [execute :as sql-jdbc.execute]
              [sync :as sql-jdbc.sync]]
+            [metabase.driver.sql-jdbc.execute.legacy-impl :as legacy]
             [metabase.driver.sql.util.unprepare :as unprepare]
             [metabase.mbql.util :as mbql.u]
             [metabase.models.table :refer [Table]]
@@ -25,11 +26,13 @@
              [store :as qp.store]
              [util :as qputil]]
             [metabase.util.honeysql-extensions :as hx]
-            [metabase.util.date-2 :as u.date])
-  (:import [java.sql ResultSet Types]
-           [java.time LocalDateTime OffsetDateTime ZonedDateTime]))
+            [metabase.util.date-2 :as u.date]
+            [clojure.tools.logging :as log])
+  (:import [java.sql ResultSet Types PreparedStatement]
+           [java.time LocalDateTime OffsetDateTime ZonedDateTime LocalDate]))
 
-(driver/register! :impala, :parent :sql-jdbc)
+;(driver/register! :impala, :parent :sql-jdbc)
+(driver/register! :impala, :parent #{:sql-jdbc ::legacy/use-legacy-classes-for-read-and-set})
 
 ;;; ------------------------------------------ Custom HoneySQL Clause Impls ------------------------------------------
 
@@ -138,6 +141,11 @@
   [_ t]
   (format "to_utc_timestamp('%s', '%s')" (u.date/format-sql (t/local-date-time t)) (t/zone-id t)))
 
+;; Impala doesn't support DATEs.
+(defmethod unprepare/unprepare-value [:impala LocalDate]
+  [driver t]
+  (unprepare/unprepare-value driver (t/local-date-time t (t/local-time 0))))
+
 ;; reimplement sql.qp/date
 ;; ref: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/impala_datetime_functions.html
 ;; ref: https://docs.cloudera.com/documentation/enterprise/6/6.3/topics/impala_functions.html
@@ -234,6 +242,21 @@
 (defmethod sql.qp/field->identifier :impala
   [_ field]
   (apply hsql/qualify (qualified-name-components field)))
+
+;; Impala JDBC42 Driver seems have issue: PreparedStatement.setObject not work on LocalDateTime
+;; [Cloudera][JDBC](11500) Given type does not match given object: 2020-07-08T00:00.
+;; Need to register driver like this.
+;; (driver/register! :impala, :parent #{:sql-jdbc ::legacy/use-legacy-classes-for-read-and-set})
+;(defmethod sql-jdbc.execute/set-parameter [:impala LocalDateTime]
+;  [_ ^PreparedStatement ps ^Integer i t]
+;  (let [t (t/sql-timestamp t)]
+;    (printf "(.setTimestamp %d ^%s %s)" i (.getName (class t)) (pr-str t))
+;    (.setTimestamp ps i t)))
+;
+;; Impala doesn't support DATEs so convert it to a DATETIME first
+(defmethod sql-jdbc.execute/set-parameter [:impala LocalDate]
+  [driver ps i t]
+  (sql-jdbc.execute/set-parameter driver ps i (t/local-date-time t (t/local-time 0))))
 
 (defmethod sql-jdbc.execute/read-column-thunk [:impala Types/TIMESTAMP]
   [_ ^ResultSet rs rsmeta ^Integer i]
