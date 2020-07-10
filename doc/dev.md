@@ -19,6 +19,10 @@ lib
 └── ImpalaJDBC42.jar
 ```
 
+`ImpalaJDBC42.jar` requires JRE 8 and support Impala server 1.0.1 ~ 3.2
+
+![image-20200524093032785](img/image-20200524093032785.png)
+
 Install lib jar into local maven repo.
 
 ```
