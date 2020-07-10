@@ -25,6 +25,8 @@ Install lib jar into local maven repo.
 make install-local-jar
 ```
 
+#### Option 1
+
 Build.
 
 ```
@@ -42,6 +44,18 @@ In metabase folder, start server.
 ```
 lein run
 ```
+
+#### Option 2 (recommend)
+
+In metabase folder, start repl server.
+
+```
+lein run-with-repl
+```
+
+Use Cursive (below configuration), debug driver code in REPL.
+
+![image-20200710163401330](img/image-20200710163401330.png)
 
 ### start impala server
 
