@@ -262,4 +262,15 @@
   [_ ^ResultSet rs rsmeta ^Integer i]
   (fn []
     (when-let [t (.getTimestamp rs i)]
-      (t/zoned-date-time (t/local-date-time t) (t/zone-id "UTC")))))
+      (t/zoned-date-time (t/local-date-time t)
+                         ;; Impala TIMESTAMP does not have TIMEZONE info.
+                         ;; Usually, We start impalad in local timezone, and store local datetime in Impala
+                         ;;
+                         ;; Meanwhile, metabase expects it has same timezone with database. Refer below:
+                         ;; https://www.metabase.com/docs/latest/troubleshooting-guide/timezones.html
+                         ;; If you’re using a database that doesn’t support a Report Time Zone,
+                         ;; it’s best to ensure that the Metabase instance’s time zone matches
+                         ;; the time zone of the database.
+                         ;;
+                         ;; So it's better get timezone from system, instead of hardcoding "UTC".
+                         (t/zone-id (System/getProperty "user.timezone"))))))
